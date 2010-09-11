@@ -7,19 +7,19 @@ Grep like text search program for Android.
 
 Support OS：Android 1.5 / 1.6 / 2.1 / 2.2
 
-//
-//■Download from Android Market
-//http://market.android.com/search?q=pname:jp.sblo.pandora.adice
-//
-//■Document
-//
-//http://sites.google.com/site/aquamarinepandora/home/adice (English)
-//http://sites.google.com/site/aquamarinepandora/home/adice_ja (Japanese)
-//
+
+■Download from Android Market
+http://market.android.com/details?id=jp.sblo.pandora.aGrep
+
+■Document
+
+https://sites.google.com/site/aquamarinepandora/home/agrep (English)
+https://sites.google.com/site/aquamarinepandora/home/agrepja (Japanese)
+
 
 ■Development Environment
 ・Eclipse for Java
-・Android SDK (SDK version 4 Donut)
+・Android SDK (SDK version 3 Cupcake)
 
 ■License
 
