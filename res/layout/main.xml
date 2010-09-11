@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+  <LinearLayout android:id="@+id/LinearLayout01"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <EditText
+      android:id="@+id/EditText01"
+      android:layout_width="wrap_content"
+      android:capitalize="none"
+      android:layout_weight="1"
+      android:layout_height="fill_parent"
+      android:singleLine="true"
+      android:hint="@string/label_hint"
+    />
+    <ImageButton
+      android:layout_width="wrap_content"
+      android:src="@drawable/search"
+      android:layout_height="fill_parent"
+      android:id="@+id/ButtonSearch"
+    />
+    <ImageButton
+      android:layout_width="wrap_content"
+      android:src="@drawable/clr"
+      android:layout_height="fill_parent"
+      android:id="@+id/ButtonClear"
+    />
+  </LinearLayout>
+
+  <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <ImageButton
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/add"
+      android:id="@+id/adddir"
+    />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:layout_gravity="left|center_vertical"
+      android:textSize="20dp"
+        android:text="@string/label_dir"
+        />
+  </LinearLayout>
+  <LinearLayout
+    android:id="@+id/listdir"
+    android:paddingLeft = "20dp"
+    android:layout_width = "fill_parent"
+    android:layout_height = "wrap_content"
+     android:orientation="vertical"
+  />
+
+  <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <ImageButton
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/add"
+      android:id="@+id/addext"
+    />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:layout_gravity="left|center_vertical"
+      android:textSize="20dp"
+        android:text="@string/label_ext"
+        />
+  </LinearLayout>
+  <LinearLayout
+    android:id="@+id/listext"
+     android:orientation="vertical"
+    android:paddingLeft = "20dp"
+    android:layout_width = "fill_parent"
+    android:layout_height = "wrap_content"
+  />
+
+  <CheckBox
+    android:id="@+id/checkre"
+    android:text="@string/label_re"
+    android:layout_width="fill_parent"
+    android:layout_height = "wrap_content"
+  />
+  <CheckBox
+    android:id="@+id/checkignorecase"
+    android:text="@string/label_ignore_case"
+    android:layout_width="fill_parent"
+    android:layout_height = "wrap_content"
+  />
+
+</LinearLayout>
+</ScrollView>

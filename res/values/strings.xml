@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">aGrep version %s http://pandora.sblo.jp/</string>
+    <string name="app_name">aGrep</string>
+    <string name="app_selector">Select directory</string>
+    <string name="grep_spinner">Now searching...</string>
+    <string name="grep_finished">Finished.</string>
+    <string name="grep_canceled">Canceled.</string>
+
+    <string name="label_dir">Target Directories</string>
+    <string name="label_ext">Target Extensions</string>
+    <string name="label_re">Regular Expression</string>
+    <string name="label_ignore_case">Ignore Case</string>
+    <string name="label_adddir">Add Directory</string>
+    <string name="label_addext">Add Extension</string>
+    <string name="label_hint">grep direct</string>
+
+    <string name="label_OK">OK</string>
+    <string name="label_CANCEL">Cancel</string>
+    <string name="label_YES">Yes</string>
+    <string name="label_NO">No</string>
+
+    <string name="label_remove_item_title">Remove item</string>
+    <string name="label_remove_item">%s\nAre you sure?</string>
+
+    <string name="label_no_target_dir">There is no target directory.\nPlease set target directory.</string>
+
+    <string name="menu_viewer">View</string>
+
+    <string name="progress">%s (in %d files)</string>
+
+    <string name="label_unable_access">Unable Access...</string>
+    <string name="label_long_press">LongPress to apply the directory.</string>
+
+</resources>

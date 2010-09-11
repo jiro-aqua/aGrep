@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<ScrollView
+  android:id="@+id/scrollview"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+  android:fillViewport="true"
+>
+<TextView
+  android:id="@+id/textedit"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="top|left"
+    android:textColor="#F000"
+    android:background="#ffff"
+    />
+</ScrollView>
+</LinearLayout>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!---      <string name="hello">aGrep version %s http://pandora.sblo.jp/</string> -->
+<!---      <string name="app_name">aGrep</string> -->
+    <string name="app_selector">ディレクトリ選択</string>
+    <string name="grep_spinner">検索中...</string>
+    <string name="grep_finished">完了しました</string>
+    <string name="grep_canceled">中断しました</string>
+
+    <string name="label_dir">検索対象ディレクトリ</string>
+    <string name="label_ext">検索対象拡張子</string>
+    <string name="label_re">正規表現</string>
+    <string name="label_ignore_case">大文字小文字の違いを無視</string>
+    <string name="label_adddir">ディレクトリ追加</string>
+    <string name="label_addext">拡張子追加</string>
+    <string name="label_hint">grep</string>
+
+    <string name="label_OK">OK</string>
+    <string name="label_CANCEL">キャンセル</string>
+    <string name="label_YES">はい</string>
+    <string name="label_NO">いいえ</string>
+
+    <string name="label_remove_item_title">項目削除</string>
+    <string name="label_remove_item">%s\n削除しますか？</string>
+
+    <string name="label_no_target_dir">検索対象ディレクトリが指定されていません。\n設定を行ってください。</string>
+
+    <string name="menu_viewer">ビューワで開く</string>
+
+    <string name="progress">%s (%dファイル中)</string>
+
+    <string name="label_unable_access">アクセス出来ません</string>
+    <string name="label_long_press">ディレクトリ名長押しで決定します</string>
+
+</resources>
