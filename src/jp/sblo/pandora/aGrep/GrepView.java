@@ -67,7 +67,7 @@ public class GrepView extends ListView {
           setFastScrollEnabled(true);
           setBackgroundColor(Color.WHITE);
           setCacheColorHint(Color.WHITE);
-//	  	setDividerHeight(0);
+	  	setDividerHeight(2);
           setOnItemClickListener( new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent , View view, int position, long id)

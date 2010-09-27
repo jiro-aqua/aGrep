@@ -102,31 +102,32 @@ public class TextViewer extends Activity {
                     is = new BufferedInputStream( new FileInputStream( f ) , 65536 );
                     is.mark(65536);
 
+                    String encode = null;
                     //  文字コードの判定
-                    UniversalDetector detector = new UniversalDetector(null);
                     try{
-                        int totalread=0;
-                        int nread;
-                        byte[] buff = new byte[1024];
-                        while ((nread = is.read(buff)) > 0 && !detector.isDone()) {
-                            detector.handleData(buff, 0, nread);
-                            totalread += nread;
-                            if ( totalread > 1024*2 ){
-                                break;
+                        UniversalDetector detector = new UniversalDetector();
+                        try{
+                            int nread;
+                            byte[] buff = new byte[4096];
+                            if ((nread = is.read(buff)) > 0 ) {
+                                detector.handleData(buff, 0, nread);
                             }
+                            detector.dataEnd();
                         }
-                        detector.dataEnd();
+                        catch (IOException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                        encode = detector.getCharset();
+    //					if ( encode != null ){
+    //						android.util.Log.e("aGrep", encode);
+    //					}
+                        is.reset();
+                        detector.reset();
+                        detector.destroy();
                     }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                        return null;
+                    catch( UniversalDetector.DetectorException e ){
                     }
-                    String encode = detector.getDetectedCharset();
-//					if ( encode != null ){
-//						android.util.Log.e("aGrep", encode);
-//					}
-                    is.reset();
-                    detector.reset();
                     BufferedReader br=null;
                     try {
                         if ( encode != null ){

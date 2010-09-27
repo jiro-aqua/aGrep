@@ -135,7 +135,9 @@ public class Search extends Activity implements GrepView.Callback
         @Override
         protected void onProgressUpdate(Integer... progress)
         {
-            mProgressDialog.setMessage( Search.this.getString(R.string.progress ,mQuery,mFileCount));
+            if ( mFileCount % 10 == 0 || progress[0] == 1 ){
+                mProgressDialog.setMessage( Search.this.getString(R.string.progress ,mQuery,mFileCount));
+            }
             if ( progress[0] == 1 ){
                 synchronized( mData ){
                     mAdapter.notifyDataSetChanged();
@@ -222,32 +224,33 @@ public class Search extends Activity implements GrepView.Callback
                 is.mark(65536);
 
                 //  文字コードの判定
-                UniversalDetector detector = new UniversalDetector(null);
+                String encode = null;
                 try{
-                    int totalread=0;
-                    int nread;
-                    byte[] buff = new byte[1024];
-                    while ((nread = is.read(buff)) > 0 && !detector.isDone()) {
-                        detector.handleData(buff, 0, nread);
-                        totalread += nread;
-                        if ( totalread > 1024*2 ){
-                            break;
+                    UniversalDetector detector = new UniversalDetector();
+                    try{
+                        int nread;
+                        byte[] buff = new byte[4096];
+                        if ((nread = is.read(buff)) > 0 ) {
+                            detector.handleData(buff, 0,nread);
                         }
+                        detector.dataEnd();
                     }
-                    detector.dataEnd();
+                    catch( FileNotFoundException e ){
+                        e.printStackTrace();
+                        return true;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return true;
+                    }
+                    encode = detector.getCharset();
+    //				if ( encode != null ){
+    //					android.util.Log.e("aGrep", encode);
+    //				}
+                    detector.reset();
+                    detector.destroy();
                 }
-                catch( FileNotFoundException e ){
-                    e.printStackTrace();
-                    return true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return true;
+                catch( UniversalDetector.DetectorException e){
                 }
-                String encode = detector.getDetectedCharset();
-//				if ( encode != null ){
-//					android.util.Log.e("aGrep", encode);
-//				}
-                detector.reset();
                 is.reset();
 
                 BufferedReader br=null;
@@ -262,10 +265,13 @@ public class Search extends Activity implements GrepView.Callback
                     String text;
                     int line = 0;
                     boolean found = false;
+                    final boolean re = mPrefs.mRegularExrpression;
+                    final boolean ic = mPrefs.mIgnoreCase;
+                    final String patternText = mPatternText;
                     while(  ( text = br.readLine() )!=null ){
                         line ++;
 
-                        if ( mPrefs.mRegularExrpression ){
+                        if ( re ){
                             Matcher m = mPattern.matcher( text );
                             if ( m.find() ){
                                 found = true;
@@ -289,18 +295,18 @@ public class Search extends Activity implements GrepView.Callback
                             }
                         }else{
                             String temptext = text;
-                            if ( mPrefs.mIgnoreCase ){
+                            if ( ic ){
                                 temptext = text.toLowerCase();
                             }
-                            if ( temptext.indexOf(mPatternText) >=0 ){
+                            if ( temptext.indexOf(patternText) >=0 ){
                                 found = true;
                                 SpannableStringBuilder ss = new SpannableStringBuilder(text);
 
                                 int start=0;
                                 int end;
 
-                                while( (start = temptext.indexOf(mPatternText, start)) > 0 ){
-                                    end = start+mPatternText.length();
+                                while( (start = temptext.indexOf(patternText, start)) > 0 ){
+                                    end = start+patternText.length();
 
                                     BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
                                     ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
