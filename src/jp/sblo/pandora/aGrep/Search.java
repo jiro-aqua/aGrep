@@ -88,7 +88,7 @@ public class Search extends Activity implements GrepView.Callback
         private int mFileCount=0;
         private boolean mCanceled;
         private Pattern mPattern;
-        private String mPatternText;
+//        private String mPatternText;
 
         @Override
         protected void onPreExecute() {
@@ -149,12 +149,17 @@ public class Search extends Activity implements GrepView.Callback
 
         boolean grepRoot( String text )
         {
+            String patternText = text;
+            if ( !mPrefs.mRegularExrpression ){
+                patternText = escapeMetaChar(patternText);
+            }
+
             if ( mPrefs.mIgnoreCase ){
-                mPatternText = text.toLowerCase();
-                mPattern = Pattern.compile(mPatternText, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE|Pattern.MULTILINE );
+//                mPatternText = text.toLowerCase();
+                mPattern = Pattern.compile(patternText, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE|Pattern.MULTILINE );
             }else{
-                mPatternText = text;
-                mPattern = Pattern.compile(mPatternText);
+//                mPatternText = text;
+                mPattern = Pattern.compile(patternText);
             }
 
             if ( Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState() ) ) {
@@ -193,6 +198,25 @@ public class Search extends Activity implements GrepView.Callback
                 }
             }
             return true;
+        }
+
+
+        String escapeMetaChar( String pattern )
+        {
+            final String metachar = ".^$[]*+?|()\\";
+
+            StringBuilder newpat = new StringBuilder();
+
+            int len = pattern.length();
+
+            for( int i=0;i<len;i++ ){
+                char c = pattern.charAt(i);
+                if ( metachar.indexOf(c) >=0 ){
+                    newpat.append('\\');
+                }
+                newpat.append(c);
+            }
+            return newpat.toString();
         }
 
         boolean grepFile( File file  )
@@ -262,64 +286,63 @@ public class Search extends Activity implements GrepView.Callback
                         br = new BufferedReader( new InputStreamReader( is ) , 8192 );
                     }
 
+
+
                     String text;
                     int line = 0;
                     boolean found = false;
-                    final boolean re = mPrefs.mRegularExrpression;
-                    final boolean ic = mPrefs.mIgnoreCase;
-                    final String patternText = mPatternText;
+                    Pattern pattern = mPattern;
                     while(  ( text = br.readLine() )!=null ){
                         line ++;
 
-                        if ( re ){
-                            Matcher m = mPattern.matcher( text );
-                            if ( m.find() ){
-                                found = true;
-                                SpannableStringBuilder ss = new SpannableStringBuilder(text);
+                        Matcher m = pattern.matcher( text );
+                        if ( m.find() ){
+                            found = true;
+                            SpannableStringBuilder ss = new SpannableStringBuilder(text);
 
-                                int start=-1;
-                                int end;
-                                while( m.find(start) ){
-                                    start = m.start();
-                                    end = m.end();
+                            int start=-1;
+                            int end;
+                            while( m.find(start) ){
+                                start = m.start();
+                                end = m.end();
 
-                                    BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
-                                    ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    start = end;
-                                }
-
-                                synchronized( mData ){
-                                    mData.add(new GrepView.Data(file, line, ss));
-                                }
-
+                                BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
+                                ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                start = end;
                             }
-                        }else{
-                            String temptext = text;
-                            if ( ic ){
-                                temptext = text.toLowerCase();
-                            }
-                            if ( temptext.indexOf(patternText) >=0 ){
-                                found = true;
-                                SpannableStringBuilder ss = new SpannableStringBuilder(text);
 
-                                int start=0;
-                                int end;
-
-                                while( (start = temptext.indexOf(patternText, start)) > 0 ){
-                                    end = start+patternText.length();
-
-                                    BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
-                                    ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    start = end;
-                                }
-
-                                synchronized( mData ){
-                                    mData.add(new GrepView.Data(file, line, ss));
-                                }
-
+                            synchronized( mData ){
+                                mData.add(new GrepView.Data(file, line, ss));
                             }
 
                         }
+//                        }else{
+//                            String temptext = text;
+//                            if ( ic ){
+//                                temptext = text.toLowerCase();
+//                            }
+//                            if ( temptext.indexOf(patternText) >=0 ){
+//                                found = true;
+//                                SpannableStringBuilder ss = new SpannableStringBuilder(text);
+//
+//                                int start=0;
+//                                int end;
+//
+//                                while( (start = temptext.indexOf(patternText, start)) > 0 ){
+//                                    end = start+patternText.length();
+//
+//                                    BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
+//                                    ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                                    start = end;
+//                                }
+//
+//                                synchronized( mData ){
+//                                    mData.add(new GrepView.Data(file, line, ss));
+//                                }
+//
+//                            }
+//
+//                        }
                     }
                     br.close();
                     is.close();
