@@ -1,13 +1,12 @@
 package jp.sblo.pandora.aGrep;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.io.File;
-
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,11 +23,6 @@ public class GrepView extends ListView {
         public File mFile ;
         public int 	mLinenumber ;
         public CharSequence 	mText;
-
-        public Typeface mFont1;
-        public Typeface mFont2;
-        public int	mSize1;
-        public int	mSize2;
 
         public Data(){
             this( null , 0 , null );
@@ -61,27 +55,25 @@ public class GrepView extends ListView {
     private void init(Context context)
     {
         setSmoothScrollbarEnabled(true);
-        setScrollingCacheEnabled  (true);
+        setScrollingCacheEnabled(true);
         setFocusable(true);
         setFocusableInTouchMode(true);
-          setFastScrollEnabled(true);
-          setBackgroundColor(Color.WHITE);
-          setCacheColorHint(Color.WHITE);
-	  	setDividerHeight(2);
-          setOnItemClickListener( new OnItemClickListener() {
+        setFastScrollEnabled(true);
+        setBackgroundColor(Color.WHITE);
+        setCacheColorHint(Color.WHITE);
+        setDividerHeight(2);
+        setOnItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent , View view, int position, long id)
-            {
-                if ( mCallback != null ){
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mCallback != null) {
                     mCallback.onGrepItemClicked(position);
                 }
             }
         });
-          setOnItemLongClickListener( new OnItemLongClickListener() {
+        setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent , View view, int position, long id)
-            {
-                if ( mCallback != null ){
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mCallback != null) {
                     return mCallback.onGrepItemLongClicked(position);
                 }
                 return false;
@@ -121,6 +113,9 @@ public class GrepView extends ListView {
     static class GrepAdapter extends ArrayAdapter<Data>
     {
 
+        private Pattern mPattern;
+        private int mColor;
+
         static	class ViewHolder {
             TextView Index;
             TextView kwic;
@@ -155,23 +150,17 @@ public class GrepView extends ListView {
             }
             Data d = getItem(position);
 
-            String fname = String.format( "%s(%d)", d.mFile.getName(), d.mLinenumber );
-            setItem( holder.Index ,fname , d.mFont1 ,d.mSize1 );
-            setItem( holder.kwic ,d.mText , d.mFont2 ,d.mSize2);
+            String fname = d.mFile.getName() + "(" + d.mLinenumber + ")";
+            holder.Index.setText(fname);
+            holder.kwic.setText( Search.highlightKeyword(d.mText, mPattern, mColor ) );
 
             return view;
         }
 
-        private void setItem( TextView tv , CharSequence str, Typeface tf , int size )
-        {
-            if (str ==null || str.length()==0 ){
-                tv.setVisibility(View.GONE);
-            }else{
-                tv.setVisibility(View.VISIBLE);
-                tv.setText(str);
-                //tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, size );
-                //tv.setTypeface( tf );
-            }
+        public void setHighlight(Pattern pattern, int color) {
+            mPattern = pattern;
+            mColor = color;
+
         }
     }
 }

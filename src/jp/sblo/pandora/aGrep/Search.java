@@ -1,7 +1,7 @@
 package jp.sblo.pandora.aGrep;
 
-import java.io.BufferedReader;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,7 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.widget.Toast;
 
@@ -32,13 +32,12 @@ import android.widget.Toast;
 
 public class Search extends Activity implements GrepView.Callback
 {
-
-    private Activity mActivity;
     private GrepView mGrepView;
     private GrepView.GrepAdapter mAdapter;
     private ArrayList<GrepView.Data>	mData ;
     private GrepTask mTask;
     private String mQuery;
+    private Pattern mPattern;
 
     private Settings.Prefs mPrefs;
 
@@ -51,17 +50,15 @@ public class Search extends Activity implements GrepView.Callback
 
         setContentView(R.layout.result);
 
-        mActivity = this;
-
         if ( mPrefs.mDirList.size() == 0 ) {
-            Toast.makeText(this,R.string.label_no_target_dir, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.label_no_target_dir, Toast.LENGTH_LONG).show();
             startActivity( new Intent(this,Settings.class) );
             finish();
         }
 
         mGrepView = (GrepView)findViewById(R.id.DicView01);
         mData = new ArrayList<GrepView.Data>();
-        mAdapter = new GrepView.GrepAdapter(mActivity, R.layout.list_row, R.id.DicView01, mData);
+        mAdapter = new GrepView.GrepAdapter(getApplicationContext(), R.layout.list_row, R.id.DicView01, mData);
         mGrepView.setAdapter( mAdapter );
         mGrepView.setCallback(this);
 
@@ -74,27 +71,62 @@ public class Search extends Activity implements GrepView.Callback
             mQuery = extras.getString(SearchManager.QUERY);
 
             if ( mQuery!=null && mQuery.length() >0 ){
-                mTask = new GrepTask();
-                mTask.execute(mQuery);
+
+                String patternText = mQuery;
+                if ( !mPrefs.mRegularExrpression ){
+                    patternText = escapeMetaChar(patternText);
+                }
+
+                if ( mPrefs.mIgnoreCase ){
+//                        mPatternText = text.toLowerCase();
+                    mPattern = Pattern.compile(patternText, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE|Pattern.MULTILINE );
+                }else{
+//                        mPatternText = text;
+                    mPattern = Pattern.compile(patternText);
+                }
+
+                if ( Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState() ) ) {
+                    mData.removeAll(mData);
+                    mAdapter.setHighlight( mPattern , 0xFF00FFFF );
+                    mTask = new GrepTask();
+                    mTask.execute(mQuery);
+                }
             }else{
                 finish();
             }
         }
     }
 
-    class GrepTask extends AsyncTask<String, Integer, Boolean>
+    static public String escapeMetaChar( String pattern )
+    {
+        final String metachar = ".^$[]*+?|()\\";
+
+        StringBuilder newpat = new StringBuilder();
+
+        int len = pattern.length();
+
+        for( int i=0;i<len;i++ ){
+            char c = pattern.charAt(i);
+            if ( metachar.indexOf(c) >=0 ){
+                newpat.append('\\');
+            }
+            newpat.append(c);
+        }
+        return newpat.toString();
+    }
+
+
+    class GrepTask extends AsyncTask<String, GrepView.Data, Boolean>
     {
         private ProgressDialog mProgressDialog;
         private int mFileCount=0;
-        private boolean mCanceled;
-        private Pattern mPattern;
-//        private String mPatternText;
+        private int mFoundcount=0;
+        private boolean mCancelled;
 
         @Override
         protected void onPreExecute() {
-            mData.removeAll(mData);
-            mCanceled = false;
-            mProgressDialog = new ProgressDialog(mActivity);
+            mCancelled=false;
+            mProgressDialog = new ProgressDialog(Search.this);
             mProgressDialog.setTitle(R.string.grep_spinner);
             mProgressDialog.setMessage(mQuery);
             mProgressDialog.setIndeterminate(true);
@@ -105,7 +137,8 @@ public class Search extends Activity implements GrepView.Callback
                 @Override
                 public void onCancel(DialogInterface dialog)
                 {
-                    mCanceled = true;
+                    mCancelled=true;
+                    cancel(false);
                 }
             });
             mProgressDialog.show();
@@ -121,25 +154,36 @@ public class Search extends Activity implements GrepView.Callback
         @Override
         protected void onPostExecute(Boolean result) {
             mProgressDialog.dismiss();
-
+            mProgressDialog = null;
             synchronized( mData ){
                 Collections.sort( mData , new GrepView.Data() );
-
                 mAdapter.notifyDataSetChanged();
             }
             mGrepView.setSelection(0);
-            Toast.makeText(mActivity,result?R.string.grep_finished:R.string.grep_canceled, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),result?R.string.grep_finished:R.string.grep_canceled, Toast.LENGTH_LONG).show();
+            mData = null;
+            mAdapter = null;
             mTask = null;
         }
 
         @Override
-        protected void onProgressUpdate(Integer... progress)
+        protected void onCancelled() {
+            super.onCancelled();
+            onPostExecute(false);
+        }
+
+        @Override
+        protected void onProgressUpdate(GrepView.Data... progress)
         {
-            if ( mFileCount % 10 == 0 || progress[0] == 1 ){
-                mProgressDialog.setMessage( Search.this.getString(R.string.progress ,mQuery,mFileCount));
+            if ( isCancelled() ){
+                return;
             }
-            if ( progress[0] == 1 ){
+            mProgressDialog.setMessage( Search.this.getString(R.string.progress ,mQuery,mFileCount));
+            if ( progress != null ){
                 synchronized( mData ){
+                    for( GrepView.Data data : progress ){
+                        mData.add(data);
+                    }
                     mAdapter.notifyDataSetChanged();
                     mGrepView.setSelection(mData.size()-1);
                 }
@@ -149,40 +193,22 @@ public class Search extends Activity implements GrepView.Callback
 
         boolean grepRoot( String text )
         {
-            String patternText = text;
-            if ( !mPrefs.mRegularExrpression ){
-                patternText = escapeMetaChar(patternText);
-            }
-
-            if ( mPrefs.mIgnoreCase ){
-//                mPatternText = text.toLowerCase();
-                mPattern = Pattern.compile(patternText, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE|Pattern.MULTILINE );
-            }else{
-//                mPatternText = text;
-                mPattern = Pattern.compile(patternText);
-            }
-
-            if ( Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState() ) ) {
-
-                for( String dir : mPrefs.mDirList ){
-                    if ( !grepDirectory(new File(dir) ) ){
-                        return false;
-                    }
+            for( String dir : mPrefs.mDirList ){
+                if ( !grepDirectory(new File(dir) ) ){
+                    return false;
                 }
-                return true;
             }
-            return false;
+            return true;
         }
 
         boolean grepDirectory( File dir )
         {
-            if ( mCanceled ){
+            if ( isCancelled() ){
                 return false;
             }
             if ( dir==null ){
                 return false;
             }
-//			android.util.Log.e( "aGrep" , "dir="+dir.getPath() );
 
             File[] flist = dir.listFiles( );
 
@@ -201,27 +227,9 @@ public class Search extends Activity implements GrepView.Callback
         }
 
 
-        String escapeMetaChar( String pattern )
-        {
-            final String metachar = ".^$[]*+?|()\\";
-
-            StringBuilder newpat = new StringBuilder();
-
-            int len = pattern.length();
-
-            for( int i=0;i<len;i++ ){
-                char c = pattern.charAt(i);
-                if ( metachar.indexOf(c) >=0 ){
-                    newpat.append('\\');
-                }
-                newpat.append(c);
-            }
-            return newpat.toString();
-        }
-
         boolean grepFile( File file  )
         {
-            if ( mCanceled ){
+            if ( isCancelled() ){
                 return false;
             }
             if ( file==null ){
@@ -238,9 +246,6 @@ public class Search extends Activity implements GrepView.Callback
             if ( !extok ){
                 return true;
             }
-
-//            android.util.Log.e( "aGrep" , "file="+file.getPath() );
-
 
             InputStream is;
             try {
@@ -267,9 +272,6 @@ public class Search extends Activity implements GrepView.Callback
                         return true;
                     }
                     encode = detector.getCharset();
-    //				if ( encode != null ){
-    //					android.util.Log.e("aGrep", encode);
-    //				}
                     detector.reset();
                     detector.destroy();
                 }
@@ -286,71 +288,50 @@ public class Search extends Activity implements GrepView.Callback
                         br = new BufferedReader( new InputStreamReader( is ) , 8192 );
                     }
 
-
-
                     String text;
                     int line = 0;
                     boolean found = false;
                     Pattern pattern = mPattern;
+                    Matcher m = null;
+                    ArrayList<GrepView.Data>    data  = null ;
+                    mFileCount++;
                     while(  ( text = br.readLine() )!=null ){
                         line ++;
-
-                        Matcher m = pattern.matcher( text );
+                        if ( m== null ){
+                            m = pattern.matcher( text );
+                        }else{
+                            m.reset( text );
+                        }
                         if ( m.find() ){
                             found = true;
-                            SpannableStringBuilder ss = new SpannableStringBuilder(text);
-
-                            int start=-1;
-                            int end;
-                            while( m.find(start) ){
-                                start = m.start();
-                                end = m.end();
-
-                                BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
-                                ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                start = end;
-                            }
 
                             synchronized( mData ){
-                                mData.add(new GrepView.Data(file, line, ss));
-                            }
+                                mFoundcount++;
+                                if ( data == null ){
+                                    data = new ArrayList<GrepView.Data>();
+                                }
+                                data.add(new GrepView.Data(file, line, text));
 
+                                if ( mFoundcount < 10 ){
+                                    publishProgress(data.toArray(new GrepView.Data[0]));
+                                    data = null;
+                                }
+                            }
+                            if ( mCancelled ){
+                                break;
+                            }
                         }
-//                        }else{
-//                            String temptext = text;
-//                            if ( ic ){
-//                                temptext = text.toLowerCase();
-//                            }
-//                            if ( temptext.indexOf(patternText) >=0 ){
-//                                found = true;
-//                                SpannableStringBuilder ss = new SpannableStringBuilder(text);
-//
-//                                int start=0;
-//                                int end;
-//
-//                                while( (start = temptext.indexOf(patternText, start)) > 0 ){
-//                                    end = start+patternText.length();
-//
-//                                    BackgroundColorSpan span = new BackgroundColorSpan( 0xFF00FFFF );
-//                                    ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                                    start = end;
-//                                }
-//
-//                                synchronized( mData ){
-//                                    mData.add(new GrepView.Data(file, line, ss));
-//                                }
-//
-//                            }
-//
-//                        }
                     }
                     br.close();
                     is.close();
-                    mFileCount++;
-                    if ( found ) {
-                        publishProgress(1);
-                    }else{
-                        publishProgress(0);
+                    if ( data != null ){
+                        publishProgress(data.toArray(new GrepView.Data[0]));
+                        data=null;
+                    }
+                    if ( !found ) {
+                        if ( mFileCount % 10 == 0 ){
+                            publishProgress((GrepView.Data[])null);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -360,59 +341,30 @@ public class Search extends Activity implements GrepView.Callback
             }
             return true;
         }
+    }
 
-//
-//		private String  extractZip(File f)
-//		{
-//			String ret=null;
-//    		ZipInputStream zis;
-//			try {
-//				zis = new ZipInputStream(new FileInputStream(f) );
-//	    		ZipEntry ze;
-//	    		while( ret==null && (ze= zis.getNextEntry())!=null ){
-//	    			String name = ze.getName();
-//
-//	    			if ( name.toLowerCase().endsWith(".dic") ){
-//	    				File nf = new File( SDCARD.getPath() + "/adice/" + getName(name) );
-//	    				nf.getParentFile().mkdir();
-//
-//	    				FileOutputStream fos = new FileOutputStream(nf);
-//
-//	    				byte[] buff = new byte[512];
-//	    				int	len;
-//	    				int offset=0;
-//	    				int lastoffset=0;
-//
-//	    				for( ;; ){
-//	    					len = zis.read(buff);
-//	    					if ( len == -1  )break;
-//	    					fos.write(buff, 0, len);
-//	    					offset += len;
-//
-//	    					// update progress bar
-//	    					if ( offset - lastoffset > 1024*16 ){
-//	    						publishProgress( offset , 0 );
-//	    						lastoffset = offset;
-//	    					}
-//	    				}
-//	    				fos.close();
-//	    				ret = nf.getPath() ;
-//	    			}
-//	    			zis.closeEntry();
-//	    		}
-//	    		zis.close();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//			return ret;
-//		}
+    public static SpannableString highlightKeyword(CharSequence text, Pattern p, int color)
+    {
+        SpannableString ss = new SpannableString(text);
 
+        int start = -1;
+        int end;
+        Matcher m = p.matcher( text );
+        while (m.find(start)) {
+            start = m.start();
+            end = m.end();
+
+            BackgroundColorSpan span = new BackgroundColorSpan(color);
+            ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            start = end;
+        }
+        return ss;
     }
 
     @Override
     public void onGrepItemClicked(int position)
     {
-        GrepView.Data data = (GrepView.Data) mAdapter.getItem(position);
+        GrepView.Data data = (GrepView.Data) mGrepView.getAdapter().getItem(position);
 
         Intent it = new Intent(this,TextViewer.class);
 
