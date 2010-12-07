@@ -1,7 +1,7 @@
 package jp.sblo.pandora.aGrep;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.widget.Toast;
 
 
@@ -87,7 +88,7 @@ public class Search extends Activity implements GrepView.Callback
 
                 if ( Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState() ) ) {
                     mData.removeAll(mData);
-                    mAdapter.setHighlight( mPattern , 0xFF00FFFF );
+                    mAdapter.setFormat( mPattern , mPrefs.mHighlightFg , mPrefs.mHighlightBg , mPrefs.mFontSize );
                     mTask = new GrepTask();
                     mTask.execute(mQuery);
                 }
@@ -238,7 +239,12 @@ public class Search extends Activity implements GrepView.Callback
 
             boolean extok=false;
             for( String ext : mPrefs.mExtList ){
-                if ( file.getName().toLowerCase().endsWith("."+ext)){
+                if ( ext.equals("*") ){
+                    if ( file.getName().indexOf('.')== -1 ){
+                        extok = true;
+                        break;
+                    }
+                }else if ( file.getName().toLowerCase().endsWith("."+ext)){
                     extok = true;
                     break;
                 }
@@ -343,7 +349,7 @@ public class Search extends Activity implements GrepView.Callback
         }
     }
 
-    public static SpannableString highlightKeyword(CharSequence text, Pattern p, int color)
+    public static SpannableString highlightKeyword(CharSequence text, Pattern p, int fgcolor, int bgcolor)
     {
         SpannableString ss = new SpannableString(text);
 
@@ -354,8 +360,11 @@ public class Search extends Activity implements GrepView.Callback
             start = m.start();
             end = m.end();
 
-            BackgroundColorSpan span = new BackgroundColorSpan(color);
-            ss.setSpan(span, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            BackgroundColorSpan bgspan = new BackgroundColorSpan(bgcolor);
+            ss.setSpan(bgspan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ForegroundColorSpan fgspan = new ForegroundColorSpan(fgcolor);
+            ss.setSpan(fgspan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
             start = end;
         }
         return ss;

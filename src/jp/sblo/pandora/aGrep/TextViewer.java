@@ -45,6 +45,7 @@ public class TextViewer extends Activity {
         mTextPreview = (TextPreview)findViewById(R.id.TextPreview);
 
 
+
         Intent it = getIntent();
         if (it!=null){
 
@@ -149,7 +150,7 @@ public class TextViewer extends Activity {
                     pattern = Pattern.compile(mPatternText);
                 }
 
-                adapter.setHighlight(pattern , 0xFF00FFFF);
+                adapter.setFormat(pattern , mPrefs.mHighlightFg , mPrefs.mHighlightBg , mPrefs.mFontSize );
                 mTextPreview.setAdapter( adapter );
 
                 int height = mTextPreview.getHeight();

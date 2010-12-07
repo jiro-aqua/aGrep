@@ -17,6 +17,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -32,6 +35,11 @@ public class Settings extends Activity {
     private static final String KEY_REGULAR_EXPRESSION = "RegularExpression";
     private static final String KEY_TARGET_EXTENSIONS = "TargetExtensions";
     private static final String KEY_TARGET_DIRECTORIES = "TargetDirectories";
+    public static final String KEY_FONTSIZE = "FontSize";
+    public static final String KEY_HIGHLIGHTFG = "HighlightFg";
+    public static final String KEY_HIGHLIGHTBG = "HighlightBg";
+
+
     private static final String PACKAGE_NAME = "jp.sblo.pandora.aGrep";
     final static int REQUEST_CODE_ADDDIC = 0x1001;
 
@@ -40,6 +48,9 @@ public class Settings extends Activity {
         ArrayList<String> mExtList = new ArrayList<String>();
         boolean mRegularExrpression = false;
         boolean mIgnoreCase = true;
+        int mFontSize = 16;
+        int mHighlightBg = 0xFF00FFFF;
+        int mHighlightFg = 0xFF000000;
     };
 
     private Prefs mPrefs;
@@ -93,11 +104,12 @@ public class Settings extends Activity {
             @Override
             public boolean onLongClick(View view)
             {
+                final String strText = (String) ((TextView)view).getText();
                 final String strItem = (String) view.getTag();
                 // Show Dialog
                 new AlertDialog.Builder(Settings.this)
                 .setTitle(R.string.label_remove_item_title)
-                .setMessage( getString(R.string.label_remove_item , strItem ) )
+                .setMessage( getString(R.string.label_remove_item , strText ) )
                 .setPositiveButton(R.string.label_OK, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         mPrefs.mExtList.remove(strItem);
@@ -157,6 +169,22 @@ public class Settings extends Activity {
                             refreshExtList();
                             savePrefs(mPrefs);
                         }
+                    }
+                })
+                .setNeutralButton(R.string.label_no_extension, new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        /* 拡張子無しボタンをクリックした時の処理 */
+
+                        String ext = "*";
+                        // 二重チェック
+                        for( String t : mPrefs.mExtList ){
+                            if ( t.equalsIgnoreCase(ext)){
+                                return;
+                            }
+                        }
+                        mPrefs.mExtList.add(ext);
+                        refreshExtList();
+                        savePrefs(mPrefs);
                     }
                 })
                 .setNegativeButton(R.string.label_CANCEL, null )
@@ -312,6 +340,10 @@ public class Settings extends Activity {
         prefs.mRegularExrpression = sp.getBoolean(KEY_REGULAR_EXPRESSION, false );
         prefs.mIgnoreCase = sp.getBoolean(KEY_IGNORE_CASE, true );
 
+        prefs.mFontSize = Integer.parseInt( sp.getString( KEY_FONTSIZE , "-1" ) );
+        prefs.mHighlightFg = sp.getInt( KEY_HIGHLIGHTFG , 0xFF000000 );
+        prefs.mHighlightBg = sp.getInt( KEY_HIGHLIGHTBG , 0xFF00FFFF );
+
         return prefs;
     }
 
@@ -326,7 +358,11 @@ public class Settings extends Activity {
         });
         for( String s : list ){
             TextView v = (TextView)View.inflate(this, R.layout.list_dir, null);
-            v.setText(s);
+            if ( s.equals("*") ){
+                v.setText(R.string.label_no_extension);
+            }else{
+                v.setText(s);
+            }
             v.setTag(s);
             v.setOnLongClickListener(logclicklistener);
             view.addView(v);
@@ -340,5 +376,20 @@ public class Settings extends Activity {
         setListItem( mExtListView , mPrefs.mExtList , mExtListener );
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.optionmenu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if ( item.getItemId() == R.id.menu_option ){
+            Intent intent = new Intent( this ,  OptionActivity.class );
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 }

@@ -71,7 +71,7 @@ D. Above three clauses are applied both to source and binary
 ■Rights
 
 This software includes parts of below projects.
-Theyt are under their licenses. 
+They are under their licenses.
 
 また、本ソフトウェアには、下記プロジェクトの一部が含まれています。
 これらについては、それぞれの作者のライセンスに従います。
@@ -80,6 +80,11 @@ juniversalchardet
   http://code.google.com/p/juniversalchardet/
    as LGPL.
 
+ColorPickerDialog
+  from http://y-anz-m.blogspot.com/2010/05/androidcolorpickerdialog.html
+   by Y.A.M.
+  from Android APIDemos by Google.
+   as Apache License.
 
 ■Contacts
 ・If you want to contact me (developper) , send message on the blog , mail or Twitter.
@@ -87,8 +92,8 @@ juniversalchardet
 ・動作報告およびバグレポートは、ブログコメント、メール、Twitterなどでご連絡ください。
 
 
----------------------------------------------------------- 
-Copyright (C) 2010, Aquamarine Networks. 
+----------------------------------------------------------
+Copyright (C) 2010, Aquamarine Networks.
 
 Blog: http://pandora.sblo.jp/
 

@@ -27,9 +27,15 @@
 
     <string name="menu_viewer">ビューワで開く</string>
 
-    <string name="progress">%s (%dファイル中)</string>
+    <string name="progress">%1$s (%2$dファイル中)</string>
 
     <string name="label_unable_access">アクセス出来ません</string>
     <string name="label_long_press">ディレクトリ名長押しで決定します</string>
+
+	<string name="label_option">オプション</string>
+	<string name="label_font_size">フォントサイズ</string>
+	<string name="label_highlight_fg">ハイライト文字色</string>
+	<string name="label_highlight_bg">ハイライト背景色</string>
+	<string name="label_no_extension">拡張子無し</string>
 
 </resources>

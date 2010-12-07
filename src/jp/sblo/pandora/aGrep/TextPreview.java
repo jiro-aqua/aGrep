@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 public class TextPreview extends ListView {
 
+
     public TextPreview(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
@@ -44,8 +45,10 @@ public class TextPreview extends ListView {
     static class Adapter extends ArrayAdapter<CharSequence>
     {
 
+        private int mFontSize;
         private Pattern mPattern;
-        private int mColor;
+        private int mFgColor;
+        private int mBgColor;
 
         public Adapter(Context context, int resource, int textViewResourceId, ArrayList<CharSequence> objects)
         {
@@ -59,17 +62,20 @@ public class TextPreview extends ListView {
             if ( view == null ) {
                 view = (TextView)inflate(getContext() , R.layout.textpreview_row , null );
                 view.setTextColor(Color.BLACK);
+                view.setTextSize(mFontSize);
             }
             CharSequence d = getItem(position);
 
-            view.setText( Search.highlightKeyword( d, mPattern, mColor ) );
+            view.setText( Search.highlightKeyword( d, mPattern, mFgColor , mBgColor ) );
 
             return view;
         }
 
-        public void setHighlight(Pattern pattern, int color) {
+        public void setFormat(Pattern pattern, int fg, int bg, int size) {
             mPattern = pattern;
-            mColor = color;
+            mFgColor = fg;
+            mBgColor = bg;
+            mFontSize = size;
         }
     }
 

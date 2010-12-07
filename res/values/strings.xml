@@ -13,7 +13,7 @@
     <string name="label_ignore_case">Ignore Case</string>
     <string name="label_adddir">Add Directory</string>
     <string name="label_addext">Add Extension</string>
-    <string name="label_hint">grep direct</string>
+    <string name="label_hint">Search word</string>
 
     <string name="label_OK">OK</string>
     <string name="label_CANCEL">Cancel</string>
@@ -27,9 +27,15 @@
 
     <string name="menu_viewer">View</string>
 
-    <string name="progress">%s (in %d files)</string>
+    <string name="progress">%1$s (in %2$d files)</string>
 
     <string name="label_unable_access">Unable Access...</string>
     <string name="label_long_press">LongPress to apply the directory.</string>
+
+	<string name="label_option">Option</string>
+	<string name="label_font_size">Font Size</string>
+	<string name="label_highlight_fg">Highlight Text Color</string>
+	<string name="label_highlight_bg">Highlight BG Color</string>
+	<string name="label_no_extension">No Extension</string>
 
 </resources>

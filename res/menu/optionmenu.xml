@@ -2,10 +2,10 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
 
-<item android:title="@string/menu_viewer"
-    android:id="@+id/menu_viewer"
-    android:icon = "@drawable/ic_menu_share"
-    android:alphabeticShortcut = "V"></item>
+<item android:title="@string/label_option"
+    android:id="@+id/menu_option"
+    android:icon = "@drawable/ic_menu_preferences"
+    android:alphabeticShortcut = "O"></item>
 
 <!---
 <item android:title="@string/help" android:id="@+id/help"

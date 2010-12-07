@@ -114,7 +114,10 @@ public class GrepView extends ListView {
     {
 
         private Pattern mPattern;
-        private int mColor;
+        private int mFgColor;
+        private int mBgColor;
+        private int mFontSize;
+
 
         static	class ViewHolder {
             TextView Index;
@@ -146,20 +149,25 @@ public class GrepView extends ListView {
                 holder.Index.setTextColor(Color.BLACK);
                 holder.kwic.setTextColor(Color.BLACK);
 
+                holder.Index.setTextSize(mFontSize);
+                holder.kwic.setTextSize(mFontSize);
+
                 view.setTag(holder);
             }
             Data d = getItem(position);
 
             String fname = d.mFile.getName() + "(" + d.mLinenumber + ")";
             holder.Index.setText(fname);
-            holder.kwic.setText( Search.highlightKeyword(d.mText, mPattern, mColor ) );
+            holder.kwic.setText( Search.highlightKeyword(d.mText, mPattern, mFgColor , mBgColor ) );
 
             return view;
         }
 
-        public void setHighlight(Pattern pattern, int color) {
+        public void setFormat(Pattern pattern, int fgcolor, int bgcolor, int size) {
             mPattern = pattern;
-            mColor = color;
+            mFgColor = fgcolor;
+            mBgColor = bgcolor;
+            mFontSize = size;
 
         }
     }
