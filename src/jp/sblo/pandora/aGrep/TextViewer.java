@@ -20,8 +20,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 
-public class TextViewer extends Activity {
+public class TextViewer extends Activity implements OnItemLongClickListener{
     public  static final String EXTRA_LINE = "line";
     public  static final String EXTRA_QUERY = "query";
     public  static final String EXTRA_PATH = "path";
@@ -44,7 +47,7 @@ public class TextViewer extends Activity {
 
         mTextPreview = (TextPreview)findViewById(R.id.TextPreview);
 
-
+        mTextPreview.setOnItemLongClickListener(this);
 
         Intent it = getIntent();
         if (it!=null){
@@ -178,11 +181,30 @@ public class TextViewer extends Activity {
             // ビュワー呼び出し
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.parse("file://" + mPath), "text/plain");
+            if ( mPrefs.addLineNumber ){
+                TextPreview textPreview = (TextPreview)findViewById(R.id.TextPreview);
+                intent.setDataAndType(Uri.parse("file://" + mPath + "?line=" + textPreview.getFirstVisiblePosition() ), "text/plain");
+            }else{
+                intent.setDataAndType(Uri.parse("file://" + mPath), "text/plain");
+            }
             startActivity(intent);
             return true;
         }
 
         return super.onMenuItemSelected(featureId, item);
+    }
+    @Override
+    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+        // ビュワー呼び出し
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        if ( mPrefs.addLineNumber ){
+            TextPreview textPreview = (TextPreview)findViewById(R.id.TextPreview);
+            intent.setDataAndType(Uri.parse("file://" + mPath + "?line=" + (1+position) ), "text/plain");
+        }else{
+            intent.setDataAndType(Uri.parse("file://" + mPath), "text/plain");
+        }
+        startActivity(intent);
+        return true;
     }
 }
