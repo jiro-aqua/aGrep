@@ -38,4 +38,7 @@
 	<string name="label_highlight_bg">Highlight BG Color</string>
 	<string name="label_no_extension">No Extension</string>
 
+	<string name="label_add_linenumber">Send Intent with line number</string>
+	<string name="summary_add_linenumber">If you open the file by Jota Text Editor, automatically move the line.</string>
+
 </resources>

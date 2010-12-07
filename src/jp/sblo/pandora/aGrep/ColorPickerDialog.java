@@ -29,6 +29,7 @@ public class ColorPickerDialog extends Dialog {
     private int mBgColor;
     private int mFgColor;
 
+
     private static class ColorPickerView extends View {
 
     	private Paint mPaint, mPaintC;
@@ -312,7 +313,13 @@ public class ColorPickerDialog extends Dialog {
                     else if(inRect){
                     	int selectColor2 = setHSVColor(selectHue, (x - OK_X0)/CENTER_X, (y - OK_X0)/CENTER_Y);
                     	selectColor = selectColor2;
-                        mOKPaint.setColor(selectColor);
+                        if ( mBgMode ){
+                            mOKPaint.setColor(selectColor);
+                            bgColor = selectColor;
+                        }else{
+                            mTextPaint.setColor(selectColor);
+                            fgColor = selectColor;
+                        }
                         invalidate();
                     }
                     break;

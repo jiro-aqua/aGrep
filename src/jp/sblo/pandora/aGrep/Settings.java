@@ -38,6 +38,7 @@ public class Settings extends Activity {
     public static final String KEY_FONTSIZE = "FontSize";
     public static final String KEY_HIGHLIGHTFG = "HighlightFg";
     public static final String KEY_HIGHLIGHTBG = "HighlightBg";
+    public static final String KEY_ADD_LINENUMBER = "AddLineNumber";
 
 
     private static final String PACKAGE_NAME = "jp.sblo.pandora.aGrep";
@@ -51,6 +52,7 @@ public class Settings extends Activity {
         int mFontSize = 16;
         int mHighlightBg = 0xFF00FFFF;
         int mHighlightFg = 0xFF000000;
+        boolean addLineNumber=false;
     };
 
     private Prefs mPrefs;
@@ -344,6 +346,7 @@ public class Settings extends Activity {
         prefs.mHighlightFg = sp.getInt( KEY_HIGHLIGHTFG , 0xFF000000 );
         prefs.mHighlightBg = sp.getInt( KEY_HIGHLIGHTBG , 0xFF00FFFF );
 
+        prefs.addLineNumber = sp.getBoolean(KEY_ADD_LINENUMBER, false);
         return prefs;
     }
 

@@ -2,6 +2,7 @@ package jp.sblo.pandora.aGrep;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -40,6 +41,15 @@ public class OptionActivity extends PreferenceActivity implements ColorPickerDia
         }
         createHighlightPreference( R.string.label_highlight_bg , true );
         createHighlightPreference( R.string.label_highlight_fg , false );
+
+        {
+            // Add Linenumber
+            final CheckBoxPreference pr = new CheckBoxPreference(this);
+            pr.setKey(Settings.KEY_ADD_LINENUMBER);
+            pr.setSummary(R.string.summary_add_linenumber);
+            pr.setTitle(R.string.label_add_linenumber);
+            mPs.addPreference(pr);
+        }
 
         setPreferenceScreen(mPs);
 
