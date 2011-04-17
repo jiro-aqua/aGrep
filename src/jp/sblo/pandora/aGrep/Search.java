@@ -246,7 +246,7 @@ public class Search extends Activity implements GrepView.Callback
                         extok = true;
                         break;
                     }
-                }else if ( file.getName().toLowerCase().endsWith("."+ext)){
+                }else if ( file.getName().toLowerCase().endsWith("."+ext.toLowerCase())){
                     extok = true;
                     break;
                 }
