@@ -213,15 +213,17 @@ public class Search extends Activity implements GrepView.Callback
 
             File[] flist = dir.listFiles( );
 
-            for( File f : flist ){
-                boolean res = false;
-                if ( f.isDirectory() ){
-                    res = grepDirectory( f );
-                }else{
-                    res = grepFile( f );
-                }
-                if ( !res ) {
-                    return false;
+            if ( flist != null ){
+                for( File f : flist ){
+                    boolean res = false;
+                    if ( f.isDirectory() ){
+                        res = grepDirectory( f );
+                    }else{
+                        res = grepFile( f );
+                    }
+                    if ( !res ) {
+                        return false;
+                    }
                 }
             }
             return true;
