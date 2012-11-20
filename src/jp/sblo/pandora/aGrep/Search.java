@@ -355,7 +355,7 @@ public class Search extends Activity implements GrepView.Callback
     {
         SpannableString ss = new SpannableString(text);
 
-        int start = -1;
+        int start = 0;
         int end;
         Matcher m = p.matcher( text );
         while (m.find(start)) {

@@ -41,4 +41,6 @@
 	<string name="label_add_linenumber">行番号を付けて開く</string>
 	<string name="summary_add_linenumber">Jota Text Editorで開く時、指定行番号まで自動的に移動するようになります。</string>
 
+	<string name="label_copied">クリップボードにコピーしました。</string>
+
 </resources>
