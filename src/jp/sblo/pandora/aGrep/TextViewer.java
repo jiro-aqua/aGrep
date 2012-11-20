@@ -13,18 +13,23 @@ import java.util.regex.Pattern;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.ClipboardManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-public class TextViewer extends Activity implements OnItemLongClickListener{
+public class TextViewer extends Activity implements OnItemLongClickListener , OnItemClickListener{
     public  static final String EXTRA_LINE = "line";
     public  static final String EXTRA_QUERY = "query";
     public  static final String EXTRA_PATH = "path";
@@ -48,6 +53,7 @@ public class TextViewer extends Activity implements OnItemLongClickListener{
         mTextPreview = (TextPreview)findViewById(R.id.TextPreview);
 
         mTextPreview.setOnItemLongClickListener(this);
+        mTextPreview.setOnItemClickListener(this);
 
         Intent it = getIntent();
         if (it!=null){
@@ -199,12 +205,21 @@ public class TextViewer extends Activity implements OnItemLongClickListener{
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
         if ( mPrefs.addLineNumber ){
-            TextPreview textPreview = (TextPreview)findViewById(R.id.TextPreview);
+//            TextPreview textPreview = (TextPreview)findViewById(R.id.TextPreview);
             intent.setDataAndType(Uri.parse("file://" + mPath + "?line=" + (1+position) ), "text/plain");
         }else{
             intent.setDataAndType(Uri.parse("file://" + mPath), "text/plain");
         }
         startActivity(intent);
         return true;
+    }
+    @Override
+    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+        // テキストのコピー
+        ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+        TextView tv = (TextView)arg1;
+        cm.setText(tv.getText());
+
+        Toast.makeText(this, R.string.label_copied, Toast.LENGTH_LONG).show();
     }
 }
