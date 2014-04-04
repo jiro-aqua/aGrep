@@ -15,7 +15,13 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content">
-    <EditText
+    <ImageButton
+      android:layout_width="wrap_content"
+      android:src="@drawable/history"
+      android:layout_height="fill_parent"
+      android:id="@+id/ButtonHistory"
+    />
+    <AutoCompleteTextView
       android:id="@+id/EditText01"
       android:layout_width="wrap_content"
       android:capitalize="none"

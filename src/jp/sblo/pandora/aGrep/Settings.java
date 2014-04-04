@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -219,7 +220,7 @@ public class Settings extends Activity {
             }
         });
 
-        final EditText edittext = (EditText) findViewById(R.id.EditText01);
+        final AutoCompleteTextView edittext = (AutoCompleteTextView) findViewById(R.id.EditText01);
         edittext.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event)
@@ -258,8 +259,13 @@ public class Settings extends Activity {
             }
         });
 
-
-
+        ImageButton historyBtn = (ImageButton) findViewById(R.id.ButtonHistory);
+        historyBtn.setOnClickListener(new OnClickListener() {
+            public void onClick(View view)
+            {
+                edittext.showDropDown();
+            }
+        });
 
     }
 
