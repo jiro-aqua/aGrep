@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -27,6 +28,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 
@@ -46,6 +48,9 @@ public class Search extends Activity implements GrepView.Callback
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled (true);
 
         mPrefs = Settings.loadPrefes(this);
 
@@ -394,4 +399,14 @@ public class Search extends Activity implements GrepView.Callback
         return false;
     }
 
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
+    }
 }
