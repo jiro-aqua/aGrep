@@ -1,7 +1,6 @@
 package jp.sblo.pandora.aGrep;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -25,6 +24,7 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -34,20 +34,38 @@ public class Settings extends Activity {
 
     private static final String KEY_IGNORE_CASE = "IgnoreCase";
     private static final String KEY_REGULAR_EXPRESSION = "RegularExpression";
-    private static final String KEY_TARGET_EXTENSIONS = "TargetExtensions";
-    private static final String KEY_TARGET_DIRECTORIES = "TargetDirectories";
+    private static final String KEY_TARGET_EXTENSIONS_OLD = "TargetExtensions";
+    private static final String KEY_TARGET_DIRECTORIES_OLD = "TargetDirectories";
+    private static final String KEY_TARGET_EXTENSIONS_NEW = "TargetExtensionsNew";
+    private static final String KEY_TARGET_DIRECTORIES_NEW = "TargetDirectoriesNew";
     public static final String KEY_FONTSIZE = "FontSize";
     public static final String KEY_HIGHLIGHTFG = "HighlightFg";
     public static final String KEY_HIGHLIGHTBG = "HighlightBg";
     public static final String KEY_ADD_LINENUMBER = "AddLineNumber";
 
-
     private static final String PACKAGE_NAME = "jp.sblo.pandora.aGrep";
     final static int REQUEST_CODE_ADDDIC = 0x1001;
 
+    public static class checkedString {
+        boolean checked;
+        String string;
+
+        public checkedString(String _s){
+            this(true,_s);
+        }
+        public checkedString(boolean _c,String _s){
+            checked = _c;
+            string = _s;
+        }
+        public String toString(){
+            return (checked?"true":"false") + "|" + string;
+        }
+
+    };
+
     public static class Prefs {
-        ArrayList<String> mDirList = new ArrayList<String>();
-        ArrayList<String> mExtList = new ArrayList<String>();
+        ArrayList<checkedString> mDirList = new ArrayList<checkedString>();
+        ArrayList<checkedString> mExtList = new ArrayList<checkedString>();
         boolean mRegularExrpression = false;
         boolean mIgnoreCase = true;
         int mFontSize = 16;
@@ -61,6 +79,7 @@ public class Settings extends Activity {
     private LinearLayout mExtListView;
     private View.OnLongClickListener mDirListener;
     private View.OnLongClickListener mExtListener;
+    private CompoundButton.OnCheckedChangeListener mCheckListener;
 
     /** Called when the activity is first created. */
     @Override
@@ -84,7 +103,7 @@ public class Settings extends Activity {
             @Override
             public boolean onLongClick(View view)
             {
-                final String strItem = (String) view.getTag();
+                final checkedString strItem = (checkedString) view.getTag();
                 // Show Dialog
                 new AlertDialog.Builder(Settings.this)
                 .setTitle(R.string.label_remove_item_title)
@@ -108,7 +127,7 @@ public class Settings extends Activity {
             public boolean onLongClick(View view)
             {
                 final String strText = (String) ((TextView)view).getText();
-                final String strItem = (String) view.getTag();
+                final checkedString strItem = (checkedString) view.getTag();
                 // Show Dialog
                 new AlertDialog.Builder(Settings.this)
                 .setTitle(R.string.label_remove_item_title)
@@ -124,6 +143,15 @@ public class Settings extends Activity {
                 .setCancelable(true)
                 .show();
                 return true;
+            }
+        };
+
+        mCheckListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final checkedString strItem = (checkedString) buttonView.getTag();
+                strItem.checked = isChecked;
+                savePrefs(mPrefs);
             }
         };
 
@@ -163,12 +191,12 @@ public class Settings extends Activity {
                         String ext = edtInput.getText().toString();
                         if (ext != null && ext.length()>0 ) {
                             // 二重チェック
-                            for( String t : mPrefs.mExtList ){
-                                if ( t.equalsIgnoreCase(ext)){
+                            for( checkedString t : mPrefs.mExtList ){
+                                if ( t.string.equalsIgnoreCase(ext)){
                                     return;
                                 }
                             }
-                            mPrefs.mExtList.add(ext);
+                            mPrefs.mExtList.add(new checkedString(ext));
                             refreshExtList();
                             savePrefs(mPrefs);
                         }
@@ -180,12 +208,12 @@ public class Settings extends Activity {
 
                         String ext = "*";
                         // 二重チェック
-                        for( String t : mPrefs.mExtList ){
-                            if ( t.equalsIgnoreCase(ext)){
+                        for( checkedString t : mPrefs.mExtList ){
+                            if ( t.string.equalsIgnoreCase(ext)){
                                 return;
                             }
                         }
-                        mPrefs.mExtList.add(ext);
+                        mPrefs.mExtList.add(new checkedString(ext));
                         refreshExtList();
                         savePrefs(mPrefs);
                     }
@@ -274,17 +302,17 @@ public class Settings extends Activity {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        // 辞書選択画面からの応答
+        // ディレクトリ選択画面からの応答
         if (requestCode == REQUEST_CODE_ADDDIC && resultCode == RESULT_OK && data != null) {
             final String dirname = data.getExtras().getString(FileSelectorActivity.INTENT_FILEPATH );
             if (dirname != null && dirname.length()>0 ) {
                 // 二重チェック
-                for( String t : mPrefs.mDirList ){
-                    if ( t.equalsIgnoreCase(dirname)){
+                for( checkedString t : mPrefs.mDirList ){
+                    if ( t.string.equalsIgnoreCase(dirname)){
                         return;
                     }
                 }
-                mPrefs.mDirList.add(dirname);
+                mPrefs.mDirList.add(new checkedString(dirname));
                 refreshDirList();
                 savePrefs(mPrefs);
             }
@@ -300,8 +328,10 @@ public class Settings extends Activity {
 
         // target directory
         StringBuilder dirs = new StringBuilder();
-        for( String t : prefs.mDirList ){
-            dirs.append(t);
+        for( checkedString t : prefs.mDirList ){
+            dirs.append(t.checked);
+            dirs.append('|');
+            dirs.append(t.string);
             dirs.append('|');
         }
         if ( dirs.length() > 0 ){
@@ -310,16 +340,20 @@ public class Settings extends Activity {
 
         // target extensions
         StringBuilder exts = new StringBuilder();
-        for( String t : prefs.mExtList ){
-            exts.append(t);
+        for( checkedString t : prefs.mExtList ){
+            exts.append(t.checked);
+            exts.append('|');
+            exts.append(t.string);
             exts.append('|');
         }
         if ( exts.length() > 0 ){
             exts.deleteCharAt(exts.length()-1);
         }
 
-        editor.putString(KEY_TARGET_DIRECTORIES, dirs.toString() );
-        editor.putString(KEY_TARGET_EXTENSIONS, exts.toString() );
+        editor.putString(KEY_TARGET_DIRECTORIES_NEW, dirs.toString() );
+        editor.putString(KEY_TARGET_EXTENSIONS_NEW, exts.toString() );
+        editor.remove(KEY_TARGET_DIRECTORIES_OLD);
+        editor.remove(KEY_TARGET_EXTENSIONS_OLD);
         editor.putBoolean(KEY_REGULAR_EXPRESSION, prefs.mRegularExrpression );
         editor.putBoolean(KEY_IGNORE_CASE, prefs.mIgnoreCase );
 
@@ -333,16 +367,46 @@ public class Settings extends Activity {
         Prefs prefs = new Prefs();
 
         // target directory
-        String dirs = sp.getString(KEY_TARGET_DIRECTORIES,"" );
+        String dirs = sp.getString(KEY_TARGET_DIRECTORIES_NEW,"" );
+        prefs.mDirList	=  new ArrayList<checkedString>();
         if ( dirs.length()>0 ){
             String[] dirsarr = dirs.split("\\|");
-            prefs.mDirList	=  new ArrayList<String>( Arrays.asList(dirsarr) );
+            int size = dirsarr.length;
+            for( int i=0;i<size;i+=2 ){
+                boolean c = dirsarr[i].equals("true");
+                String s = dirsarr[i+1];
+                prefs.mDirList.add(new checkedString(c,s));
+            }
+        }else{
+            dirs = sp.getString(KEY_TARGET_DIRECTORIES_OLD,"" );
+            if ( dirs.length()>0 ){
+                String[] dirsarr = dirs.split("\\|");
+                int size = dirsarr.length;
+                for( int i=0;i<size;i++ ){
+                    prefs.mDirList.add(new checkedString(dirsarr[i]));
+                }
+            }
         }
         // target extensions
-        String exts = sp.getString(KEY_TARGET_EXTENSIONS,"txt" );
+        String exts = sp.getString(KEY_TARGET_EXTENSIONS_NEW,"" );
+        prefs.mExtList	=  new ArrayList<checkedString>();
         if ( exts.length()>0 ){
-            String[] extsarr = exts.split("\\|");
-            prefs.mExtList	=  new ArrayList<String>( Arrays.asList(extsarr) );
+            String[] arr = exts.split("\\|");
+            int size = arr.length;
+            for( int i=0;i<size;i+=2 ){
+                boolean c = arr[i].equals("true");
+                String s = arr[i+1];
+                prefs.mExtList.add(new checkedString(c,s));
+            }
+        }else{
+            exts = sp.getString(KEY_TARGET_EXTENSIONS_OLD,"txt" );
+            if ( exts.length()>0 ){
+                String[] arr = exts.split("\\|");
+                int size = arr.length;
+                for( int i=0;i<size;i++ ){
+                    prefs.mExtList.add(new checkedString(arr[i]));
+                }
+            }
         }
 
         prefs.mRegularExrpression = sp.getBoolean(KEY_REGULAR_EXPRESSION, false );
@@ -356,33 +420,38 @@ public class Settings extends Activity {
         return prefs;
     }
 
-    void setListItem( LinearLayout view , ArrayList<String> list , View.OnLongClickListener logclicklistener )
+    void setListItem( LinearLayout view ,
+            ArrayList<checkedString> list ,
+            View.OnLongClickListener logclicklistener ,
+            CompoundButton.OnCheckedChangeListener checkedChangeListener )
     {
         view.removeAllViews();
-        Collections.sort(list, new Comparator<String>() {
+        Collections.sort(list, new Comparator<checkedString>() {
             @Override
-            public int compare(String object1, String object2) {
-                return object1.compareToIgnoreCase(object2);
+            public int compare(checkedString object1, checkedString object2) {
+                return object1.string.compareToIgnoreCase(object2.string);
             }
         });
-        for( String s : list ){
-            TextView v = (TextView)View.inflate(this, R.layout.list_dir, null);
+        for( checkedString s : list ){
+            CheckBox v = (CheckBox)View.inflate(this, R.layout.list_dir, null);
             if ( s.equals("*") ){
                 v.setText(R.string.label_no_extension);
             }else{
-                v.setText(s);
+                v.setText(s.string);
             }
+            v.setChecked( s.checked );
             v.setTag(s);
             v.setOnLongClickListener(logclicklistener);
+            v.setOnCheckedChangeListener(checkedChangeListener);
             view.addView(v);
         }
     }
 
     private void refreshDirList(){
-        setListItem( mDirListView , mPrefs.mDirList , mDirListener );
+        setListItem( mDirListView , mPrefs.mDirList , mDirListener , mCheckListener);
     }
     private void refreshExtList(){
-        setListItem( mExtListView , mPrefs.mExtList , mExtListener );
+        setListItem( mExtListView , mPrefs.mExtList , mExtListener , mCheckListener);
     }
 
     @Override

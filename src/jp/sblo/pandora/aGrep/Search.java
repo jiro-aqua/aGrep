@@ -194,8 +194,8 @@ public class Search extends Activity implements GrepView.Callback
 
         boolean grepRoot( String text )
         {
-            for( String dir : mPrefs.mDirList ){
-                if ( !grepDirectory(new File(dir) ) ){
+            for( Settings.checkedString dir : mPrefs.mDirList ){
+                if ( dir.checked && !grepDirectory(new File(dir.string) ) ){
                     return false;
                 }
             }
@@ -240,15 +240,17 @@ public class Search extends Activity implements GrepView.Callback
             }
 
             boolean extok=false;
-            for( String ext : mPrefs.mExtList ){
-                if ( ext.equals("*") ){
-                    if ( file.getName().indexOf('.')== -1 ){
+            for( Settings.checkedString ext : mPrefs.mExtList ){
+                if ( ext.checked ){
+                    if ( ext.string.equals("*") ){
+                        if ( file.getName().indexOf('.')== -1 ){
+                            extok = true;
+                            break;
+                        }
+                    }else if ( file.getName().toLowerCase().endsWith("."+ext.string.toLowerCase())){
                         extok = true;
                         break;
                     }
-                }else if ( file.getName().toLowerCase().endsWith("."+ext.toLowerCase())){
-                    extok = true;
-                    break;
                 }
             }
             if ( !extok ){
