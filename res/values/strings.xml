@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">aGrep version %s http://pandora.sblo.jp/</string>
+    <string name="version">aGrep version %s</string>
+    <string name="link">http://pandora.sblo.jp/</string>
     <string name="app_name">aGrep</string>
     <string name="app_selector">Select directory</string>
     <string name="grep_spinner">Now searching...</string>
@@ -32,15 +33,17 @@
     <string name="label_unable_access">Unable Access...</string>
     <string name="label_long_press">LongPress to apply the directory.</string>
 
-	<string name="label_option">Option</string>
-	<string name="label_font_size">Font Size</string>
-	<string name="label_highlight_fg">Highlight Text Color</string>
-	<string name="label_highlight_bg">Highlight BG Color</string>
-	<string name="label_no_extension">No Extension</string>
+  <string name="label_option">Preferences</string>
+  <string name="label_font_size">Font Size</string>
+  <string name="label_highlight_fg">Highlight Text Color</string>
+  <string name="label_highlight_bg">Highlight BG Color</string>
+  <string name="label_no_extension">No Extension</string>
 
-	<string name="label_add_linenumber">Send Intent with line number</string>
-	<string name="summary_add_linenumber">If you open the file by Jota Text Editor, automatically move the line.</string>
+  <string name="label_add_linenumber">Send Intent with line number</string>
+  <string name="summary_add_linenumber">If you open the file by Jota Text Editor, automatically move the line.</string>
 
-	<string name="label_copied">Copied to clipboard</string>
+  <string name="label_copied">Copied to clipboard</string>
+  <string name="color_picker_input">Input Color code</string>
+  <string name="color_picker_hint">Enter 6-digit hexadecimal</string>
 
 </resources>

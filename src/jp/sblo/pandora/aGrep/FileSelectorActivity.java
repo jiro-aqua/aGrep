@@ -1,8 +1,10 @@
 package jp.sblo.pandora.aGrep;
 
 import android.os.Bundle;
+import android.app.ActionBar;
 import android.app.ListActivity;
 import android.os.Environment;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -37,6 +39,9 @@ public class FileSelectorActivity extends ListActivity {
 //		if (extras != null) {
 //			extension = (String[]) extras.get(INTENT_EXTENSION);
 //		}
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled (true);
 
         if ( ! Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
             Toast.makeText(FileSelectorActivity.this, R.string.label_unable_access, Toast.LENGTH_SHORT).show();
@@ -174,6 +179,17 @@ public class FileSelectorActivity extends ListActivity {
         ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
                 R.layout.file_row, items);
         setListAdapter(fileList);
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
     }
 
 }

@@ -90,12 +90,6 @@ public class Settings extends Activity {
 
         setContentView(R.layout.main);
 
-        // set Version Name to title field
-        try {
-            setTitle( getString( R.string.hello , getPackageManager().getPackageInfo( PACKAGE_NAME, 0).versionName  ));
-        } catch (NameNotFoundException e) {
-        }
-
         mDirListView = (LinearLayout)findViewById(R.id.listdir);
         mExtListView = (LinearLayout)findViewById(R.id.listext);
 

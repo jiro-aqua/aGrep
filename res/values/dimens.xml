@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="color_icon_height">72dp</dimen>
+    <dimen name="color_icon_padding">3dp</dimen>
+    <integer name="color_picker_columns">3</integer>
+
+</resources>

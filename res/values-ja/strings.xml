@@ -32,15 +32,18 @@
     <string name="label_unable_access">アクセス出来ません</string>
     <string name="label_long_press">ディレクトリ名長押しで決定します</string>
 
-	<string name="label_option">オプション</string>
-	<string name="label_font_size">フォントサイズ</string>
-	<string name="label_highlight_fg">ハイライト文字色</string>
-	<string name="label_highlight_bg">ハイライト背景色</string>
-	<string name="label_no_extension">拡張子無し</string>
+  <string name="label_option">設定</string>
+  <string name="label_font_size">フォントサイズ</string>
+  <string name="label_highlight_fg">ハイライト文字色</string>
+  <string name="label_highlight_bg">ハイライト背景色</string>
+  <string name="label_no_extension">拡張子無し</string>
 
-	<string name="label_add_linenumber">行番号を付けて開く</string>
-	<string name="summary_add_linenumber">Jota Text Editorで開く時、指定行番号まで自動的に移動するようになります。</string>
+  <string name="label_add_linenumber">行番号を付けて開く</string>
+  <string name="summary_add_linenumber">Jota Text Editorで開く時、指定行番号まで自動的に移動するようになります。</string>
 
-	<string name="label_copied">クリップボードにコピーしました。</string>
+  <string name="label_copied">クリップボードにコピーしました。</string>
+
+    <string name="color_picker_input">カラーコード入力</string>
+    <string name="color_picker_hint">16進数6桁で入力してください</string>
 
 </resources>

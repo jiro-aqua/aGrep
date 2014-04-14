@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -46,10 +47,12 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPrefs = Settings.loadPrefes(getApplicationContext());
-
         setContentView(R.layout.textviewer);
+        ActionBar actionBar = getActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled (true);
 
+        mPrefs = Settings.loadPrefes(getApplicationContext());
         mTextPreview = (TextPreview)findViewById(R.id.TextPreview);
 
         mTextPreview.setOnItemLongClickListener(this);
@@ -195,10 +198,13 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
             }
             startActivity(intent);
             return true;
+        }else if ( id == android.R.id.home ){
+            finish();
+            return true;
         }
-
         return super.onMenuItemSelected(featureId, item);
     }
+
     @Override
     public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
         // ビュワー呼び出し
@@ -222,4 +228,5 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
 
         Toast.makeText(this, R.string.label_copied, Toast.LENGTH_LONG).show();
     }
+
 }
