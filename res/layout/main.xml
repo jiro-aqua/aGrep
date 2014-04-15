@@ -30,6 +30,7 @@
       android:singleLine="true"
       android:hint="@string/label_hint"
       android:completionThreshold="1"
+      android:imeOptions="flagNoExtractUi|actionSearch"
     />
     <ImageButton
       android:layout_width="wrap_content"

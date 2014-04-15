@@ -219,7 +219,6 @@ public class Settings extends Activity {
                 return false;
             }
         });
-        edittext.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         mRecentAdapter = new ArrayAdapter<String>(mContext,android.R.layout.simple_dropdown_item_1line, new ArrayList<String>());
         edittext.setAdapter(mRecentAdapter);
 
