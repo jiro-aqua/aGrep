@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="version">aGrep version %s</string>
-    <string name="link">http://pandora.sblo.jp/</string>
+    <string name="link">© 2014 Aquamarine Networks.</string>
+    <string name="icondesign">Icon designed by Non Miyabi</string>
+    <string name="iconsite">Non\'s Illust Gallery</string>
+    <string name="iconlink">http://sites.google.com/site/nonsillustgallery/</string>
+
     <string name="app_name">aGrep</string>
     <string name="app_selector">Select directory</string>
-    <string name="grep_spinner">Now searching...</string>
+    <string name="grep_spinner">Now searching…</string>
     <string name="grep_finished">Finished.</string>
     <string name="grep_canceled">Canceled.</string>
 
@@ -30,7 +34,7 @@
 
     <string name="progress">%1$s (in %2$d files)</string>
 
-    <string name="label_unable_access">Unable Access...</string>
+    <string name="label_unable_access">Unable Access…</string>
     <string name="label_long_press">LongPress to apply the directory.</string>
 
   <string name="label_option">Preferences</string>

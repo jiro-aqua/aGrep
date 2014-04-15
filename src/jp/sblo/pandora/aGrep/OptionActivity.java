@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -20,11 +21,12 @@ public class OptionActivity extends PreferenceActivity  {
 
     private PreferenceScreen mPs = null;
     private PreferenceManager mPm;
-    private Settings.Prefs  mPrefs;
+    private Prefs  mPrefs;
 
     final private static int REQUEST_CODE_HIGHLIGHT = 0x1000;
     final private static int REQUEST_CODE_BACKGROUND = 0x1001;
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +34,7 @@ public class OptionActivity extends PreferenceActivity  {
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled (true);
 
-        mPrefs = Settings.loadPrefes(this);
+        mPrefs = Prefs.loadPrefes(this);
 
         mPm = getPreferenceManager();
         mPs = mPm.createPreferenceScreen(this);
@@ -40,9 +42,29 @@ public class OptionActivity extends PreferenceActivity  {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 
         {
+            final Preference pr = new Preference(this);
+            // set Version Name to title field
+            try {
+                pr.setTitle(getString(R.string.version, getPackageManager()
+                        .getPackageInfo(getPackageName(), 0).versionName));
+            } catch (NameNotFoundException e) {
+            }
+            pr.setSummary(R.string.link);
+            pr.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference){
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("market://details?id=jp.sblo.pandora.aGrep"));
+                    startActivity(intent);
+                    return true;
+                }
+            });
+            mPs.addPreference(pr);
+        }
+        {
             // フォントサイズ
             final ListPreference pr = new ListPreference(this);
-            pr.setKey(Settings.KEY_FONTSIZE);
+            pr.setKey(Prefs.KEY_FONTSIZE);
             pr.setSummary(sp.getString(pr.getKey(), ""));
             pr.setTitle(R.string.label_font_size);
             pr.setEntries(new String[] { "10", "14", "16", "18", "20", "24", "30", "36",  });
@@ -55,7 +77,7 @@ public class OptionActivity extends PreferenceActivity  {
         {
             // Add Linenumber
             final CheckBoxPreference pr = new CheckBoxPreference(this);
-            pr.setKey(Settings.KEY_ADD_LINENUMBER);
+            pr.setKey(Prefs.KEY_ADD_LINENUMBER);
             pr.setSummary(R.string.summary_add_linenumber);
             pr.setTitle(R.string.label_add_linenumber);
             mPs.addPreference(pr);
@@ -63,13 +85,17 @@ public class OptionActivity extends PreferenceActivity  {
 
         {
             final Preference pr = new Preference(this);
-            // set Version Name to title field
-            try {
-                pr.setTitle(getString(R.string.version, getPackageManager()
-                        .getPackageInfo(getPackageName(), 0).versionName));
-            } catch (NameNotFoundException e) {
-            }
-            pr.setSummary(R.string.link);
+            pr.setTitle(R.string.icondesign);
+            pr.setSummary(R.string.iconsite);
+            pr.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference){
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(getString(R.string.iconlink)));
+                    startActivity(intent);
+                    return true;
+                }
+            });
             mPs.addPreference(pr);
         }
         setPreferenceScreen(mPs);
@@ -107,9 +133,9 @@ public class OptionActivity extends PreferenceActivity  {
             }
             final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             sp.edit()
-            .putInt(Settings.KEY_HIGHLIGHTFG, mPrefs.mHighlightFg)
-            .putInt(Settings.KEY_HIGHLIGHTBG, mPrefs.mHighlightBg)
-            .commit();
+            .putInt(Prefs.KEY_HIGHLIGHTFG, mPrefs.mHighlightFg)
+            .putInt(Prefs.KEY_HIGHLIGHTBG, mPrefs.mHighlightBg)
+            .apply();
         }
     }
 

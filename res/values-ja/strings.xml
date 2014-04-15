@@ -2,8 +2,11 @@
 <resources>
 <!---      <string name="hello">aGrep version %s http://pandora.sblo.jp/</string> -->
 <!---      <string name="app_name">aGrep</string> -->
+    <string name="icondesign">アイコン作成　宮比のん</string>
+    <string name="iconsite">のんたいとる</string>
+
     <string name="app_selector">ディレクトリ選択</string>
-    <string name="grep_spinner">検索中...</string>
+    <string name="grep_spinner">検索中…</string>
     <string name="grep_finished">完了しました</string>
     <string name="grep_canceled">中断しました</string>
 

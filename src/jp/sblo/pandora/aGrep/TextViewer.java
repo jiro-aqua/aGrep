@@ -14,21 +14,22 @@ import org.mozilla.universalchardet.UniversalDetector;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.ClipboardManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class TextViewer extends Activity implements OnItemLongClickListener , OnItemClickListener{
     public  static final String EXTRA_LINE = "line";
@@ -38,7 +39,7 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
     private TextLoadTask mTask;
     private String mPatternText;
     private int mLine;
-    private Settings.Prefs mPrefs;
+    private Prefs mPrefs;
     private String mPath;
     private TextPreview mTextPreview;
     ArrayList<CharSequence> mData = new ArrayList<CharSequence>();
@@ -52,7 +53,7 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled (true);
 
-        mPrefs = Settings.loadPrefes(getApplicationContext());
+        mPrefs = Prefs.loadPrefes(getApplicationContext());
         mTextPreview = (TextPreview)findViewById(R.id.TextPreview);
 
         mTextPreview.setOnItemLongClickListener(this);
@@ -112,6 +113,7 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
                         }
                         catch (IOException e) {
                             e.printStackTrace();
+                            is.close();
                             return false;
                         }
                         encode = detector.getCharset();
@@ -224,7 +226,8 @@ public class TextViewer extends Activity implements OnItemLongClickListener , On
         // テキストのコピー
         ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
         TextView tv = (TextView)arg1;
-        cm.setText(tv.getText());
+        ClipData clip = ClipData.newPlainText("aGrep Text Viewer",tv.getText());
+        cm.setPrimaryClip(clip);
 
         Toast.makeText(this, R.string.label_copied, Toast.LENGTH_LONG).show();
     }

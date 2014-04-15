@@ -3,6 +3,7 @@ package jp.sblo.pandora.aGrep;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,11 +11,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -32,47 +30,7 @@ import android.widget.TextView;
 
 public class Settings extends Activity {
 
-    private static final String KEY_IGNORE_CASE = "IgnoreCase";
-    private static final String KEY_REGULAR_EXPRESSION = "RegularExpression";
-    private static final String KEY_TARGET_EXTENSIONS_OLD = "TargetExtensions";
-    private static final String KEY_TARGET_DIRECTORIES_OLD = "TargetDirectories";
-    private static final String KEY_TARGET_EXTENSIONS_NEW = "TargetExtensionsNew";
-    private static final String KEY_TARGET_DIRECTORIES_NEW = "TargetDirectoriesNew";
-    public static final String KEY_FONTSIZE = "FontSize";
-    public static final String KEY_HIGHLIGHTFG = "HighlightFg";
-    public static final String KEY_HIGHLIGHTBG = "HighlightBg";
-    public static final String KEY_ADD_LINENUMBER = "AddLineNumber";
-
-    private static final String PACKAGE_NAME = "jp.sblo.pandora.aGrep";
     final static int REQUEST_CODE_ADDDIC = 0x1001;
-
-    public static class checkedString {
-        boolean checked;
-        String string;
-
-        public checkedString(String _s){
-            this(true,_s);
-        }
-        public checkedString(boolean _c,String _s){
-            checked = _c;
-            string = _s;
-        }
-        public String toString(){
-            return (checked?"true":"false") + "|" + string;
-        }
-
-    };
-
-    public static class Prefs {
-        ArrayList<checkedString> mDirList = new ArrayList<checkedString>();
-        ArrayList<checkedString> mExtList = new ArrayList<checkedString>();
-        boolean mRegularExrpression = false;
-        boolean mIgnoreCase = true;
-        int mFontSize = 16;
-        int mHighlightBg = 0xFF00FFFF;
-        int mHighlightFg = 0xFF000000;
-        boolean addLineNumber=false;
-    };
 
     private Prefs mPrefs;
     private LinearLayout mDirListView;
@@ -80,13 +38,16 @@ public class Settings extends Activity {
     private View.OnLongClickListener mDirListener;
     private View.OnLongClickListener mExtListener;
     private CompoundButton.OnCheckedChangeListener mCheckListener;
+    private ArrayAdapter<String> mRecentAdapter;
+    private Context mContext;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
 
-        mPrefs = loadPrefes(this);
+        mPrefs = Prefs.loadPrefes(this);
 
         setContentView(R.layout.main);
 
@@ -97,16 +58,16 @@ public class Settings extends Activity {
             @Override
             public boolean onLongClick(View view)
             {
-                final checkedString strItem = (checkedString) view.getTag();
+                final CheckedString strItem = (CheckedString) view.getTag();
                 // Show Dialog
-                new AlertDialog.Builder(Settings.this)
+                new AlertDialog.Builder(mContext)
                 .setTitle(R.string.label_remove_item_title)
                 .setMessage( getString(R.string.label_remove_item , strItem ) )
                 .setPositiveButton(R.string.label_OK, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         mPrefs.mDirList.remove(strItem);
                         refreshDirList();
-                        savePrefs(mPrefs);
+                        mPrefs.savePrefs(mContext);
                     }
                 })
                 .setNegativeButton(R.string.label_CANCEL, null )
@@ -121,16 +82,16 @@ public class Settings extends Activity {
             public boolean onLongClick(View view)
             {
                 final String strText = (String) ((TextView)view).getText();
-                final checkedString strItem = (checkedString) view.getTag();
+                final CheckedString strItem = (CheckedString) view.getTag();
                 // Show Dialog
-                new AlertDialog.Builder(Settings.this)
+                new AlertDialog.Builder(mContext)
                 .setTitle(R.string.label_remove_item_title)
                 .setMessage( getString(R.string.label_remove_item , strText ) )
                 .setPositiveButton(R.string.label_OK, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         mPrefs.mExtList.remove(strItem);
                         refreshExtList();
-                        savePrefs(mPrefs);
+                        mPrefs.savePrefs(mContext);
                     }
                 })
                 .setNegativeButton(R.string.label_CANCEL, null )
@@ -143,9 +104,9 @@ public class Settings extends Activity {
         mCheckListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                final checkedString strItem = (checkedString) buttonView.getTag();
+                final CheckedString strItem = (CheckedString) buttonView.getTag();
                 strItem.checked = isChecked;
-                savePrefs(mPrefs);
+                mPrefs.savePrefs(mContext);
             }
         };
 
@@ -161,7 +122,7 @@ public class Settings extends Activity {
             public void onClick(View v)
             {
                 // ファイル選択画面呼び出し
-                Intent intent = new Intent( Settings.this , FileSelectorActivity.class );
+                Intent intent = new Intent( mContext , FileSelectorActivity.class );
                 startActivityForResult(intent, REQUEST_CODE_ADDDIC);
             }
         });
@@ -172,10 +133,10 @@ public class Settings extends Activity {
             public void onClick(View view)
             {
                 // Create EditText
-                final EditText edtInput = new EditText(Settings.this);
+                final EditText edtInput = new EditText(mContext);
                 edtInput.setSingleLine();
                 // Show Dialog
-                new AlertDialog.Builder(Settings.this)
+                new AlertDialog.Builder(mContext)
                 .setTitle(R.string.label_addext)
                 .setView(edtInput)
                 .setPositiveButton(R.string.label_OK, new DialogInterface.OnClickListener() {
@@ -185,14 +146,14 @@ public class Settings extends Activity {
                         String ext = edtInput.getText().toString();
                         if (ext != null && ext.length()>0 ) {
                             // 二重チェック
-                            for( checkedString t : mPrefs.mExtList ){
+                            for( CheckedString t : mPrefs.mExtList ){
                                 if ( t.string.equalsIgnoreCase(ext)){
                                     return;
                                 }
                             }
-                            mPrefs.mExtList.add(new checkedString(ext));
+                            mPrefs.mExtList.add(new CheckedString(ext));
                             refreshExtList();
-                            savePrefs(mPrefs);
+                            mPrefs.savePrefs(mContext);
                         }
                     }
                 })
@@ -202,14 +163,14 @@ public class Settings extends Activity {
 
                         String ext = "*";
                         // 二重チェック
-                        for( checkedString t : mPrefs.mExtList ){
+                        for( CheckedString t : mPrefs.mExtList ){
                             if ( t.string.equalsIgnoreCase(ext)){
                                 return;
                             }
                         }
-                        mPrefs.mExtList.add(new checkedString(ext));
+                        mPrefs.mExtList.add(new CheckedString(ext));
                         refreshExtList();
-                        savePrefs(mPrefs);
+                        mPrefs.savePrefs(mContext);
                     }
                 })
                 .setNegativeButton(R.string.label_CANCEL, null )
@@ -230,7 +191,7 @@ public class Settings extends Activity {
             public void onClick(View view)
             {
                 mPrefs.mRegularExrpression = chkRe.isChecked();
-                savePrefs(mPrefs);
+                mPrefs.savePrefs(mContext);
             }
         });
         chkIc.setOnClickListener(new View.OnClickListener() {
@@ -238,7 +199,7 @@ public class Settings extends Activity {
             public void onClick(View view)
             {
                 mPrefs.mIgnoreCase = chkIc.isChecked();
-                savePrefs(mPrefs);
+                mPrefs.savePrefs(mContext);
             }
         });
 
@@ -249,7 +210,7 @@ public class Settings extends Activity {
             {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP ) {
                     String text = edittext.getEditableText().toString();
-                    Intent it = new Intent(Settings.this,Search.class);
+                    Intent it = new Intent(mContext,Search.class);
                     it.setAction(Intent.ACTION_SEARCH);
                     it.putExtra(SearchManager.QUERY,text );
                     startActivity( it );
@@ -259,6 +220,8 @@ public class Settings extends Activity {
             }
         });
         edittext.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        mRecentAdapter = new ArrayAdapter<String>(mContext,android.R.layout.simple_dropdown_item_1line, new ArrayList<String>());
+        edittext.setAdapter(mRecentAdapter);
 
         ImageButton clrBtn = (ImageButton) findViewById(R.id.ButtonClear);
         clrBtn.setOnClickListener(new OnClickListener() {
@@ -274,7 +237,7 @@ public class Settings extends Activity {
             public void onClick(View view)
             {
                 String text = edittext.getText().toString();
-                Intent it = new Intent(Settings.this,Search.class);
+                Intent it = new Intent(mContext,Search.class);
                 it.setAction(Intent.ACTION_SEARCH);
                 it.putExtra(SearchManager.QUERY,text );
                 startActivity( it );
@@ -301,132 +264,32 @@ public class Settings extends Activity {
             final String dirname = data.getExtras().getString(FileSelectorActivity.INTENT_FILEPATH );
             if (dirname != null && dirname.length()>0 ) {
                 // 二重チェック
-                for( checkedString t : mPrefs.mDirList ){
+                for( CheckedString t : mPrefs.mDirList ){
                     if ( t.string.equalsIgnoreCase(dirname)){
                         return;
                     }
                 }
-                mPrefs.mDirList.add(new checkedString(dirname));
+                mPrefs.mDirList.add(new CheckedString(dirname));
                 refreshDirList();
-                savePrefs(mPrefs);
+                mPrefs.savePrefs(mContext);
             }
         }
 
-    }
-
-    private void savePrefs(Prefs prefs)
-    {
-        final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        Editor editor = sp.edit();
-
-        // target directory
-        StringBuilder dirs = new StringBuilder();
-        for( checkedString t : prefs.mDirList ){
-            dirs.append(t.checked);
-            dirs.append('|');
-            dirs.append(t.string);
-            dirs.append('|');
-        }
-        if ( dirs.length() > 0 ){
-            dirs.deleteCharAt(dirs.length()-1);
-        }
-
-        // target extensions
-        StringBuilder exts = new StringBuilder();
-        for( checkedString t : prefs.mExtList ){
-            exts.append(t.checked);
-            exts.append('|');
-            exts.append(t.string);
-            exts.append('|');
-        }
-        if ( exts.length() > 0 ){
-            exts.deleteCharAt(exts.length()-1);
-        }
-
-        editor.putString(KEY_TARGET_DIRECTORIES_NEW, dirs.toString() );
-        editor.putString(KEY_TARGET_EXTENSIONS_NEW, exts.toString() );
-        editor.remove(KEY_TARGET_DIRECTORIES_OLD);
-        editor.remove(KEY_TARGET_EXTENSIONS_OLD);
-        editor.putBoolean(KEY_REGULAR_EXPRESSION, prefs.mRegularExrpression );
-        editor.putBoolean(KEY_IGNORE_CASE, prefs.mIgnoreCase );
-
-        editor.commit();
-    }
-
-    static public Prefs loadPrefes(Context ctx)
-    {
-        final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
-
-        Prefs prefs = new Prefs();
-
-        // target directory
-        String dirs = sp.getString(KEY_TARGET_DIRECTORIES_NEW,"" );
-        prefs.mDirList	=  new ArrayList<checkedString>();
-        if ( dirs.length()>0 ){
-            String[] dirsarr = dirs.split("\\|");
-            int size = dirsarr.length;
-            for( int i=0;i<size;i+=2 ){
-                boolean c = dirsarr[i].equals("true");
-                String s = dirsarr[i+1];
-                prefs.mDirList.add(new checkedString(c,s));
-            }
-        }else{
-            dirs = sp.getString(KEY_TARGET_DIRECTORIES_OLD,"" );
-            if ( dirs.length()>0 ){
-                String[] dirsarr = dirs.split("\\|");
-                int size = dirsarr.length;
-                for( int i=0;i<size;i++ ){
-                    prefs.mDirList.add(new checkedString(dirsarr[i]));
-                }
-            }
-        }
-        // target extensions
-        String exts = sp.getString(KEY_TARGET_EXTENSIONS_NEW,"" );
-        prefs.mExtList	=  new ArrayList<checkedString>();
-        if ( exts.length()>0 ){
-            String[] arr = exts.split("\\|");
-            int size = arr.length;
-            for( int i=0;i<size;i+=2 ){
-                boolean c = arr[i].equals("true");
-                String s = arr[i+1];
-                prefs.mExtList.add(new checkedString(c,s));
-            }
-        }else{
-            exts = sp.getString(KEY_TARGET_EXTENSIONS_OLD,"txt" );
-            if ( exts.length()>0 ){
-                String[] arr = exts.split("\\|");
-                int size = arr.length;
-                for( int i=0;i<size;i++ ){
-                    prefs.mExtList.add(new checkedString(arr[i]));
-                }
-            }
-        }
-
-        prefs.mRegularExrpression = sp.getBoolean(KEY_REGULAR_EXPRESSION, false );
-        prefs.mIgnoreCase = sp.getBoolean(KEY_IGNORE_CASE, true );
-
-        prefs.mFontSize = Integer.parseInt( sp.getString( KEY_FONTSIZE , "-1" ) );
-        prefs.mHighlightFg = sp.getInt( KEY_HIGHLIGHTFG , 0xFF000000 );
-        prefs.mHighlightBg = sp.getInt( KEY_HIGHLIGHTBG , 0xFF00FFFF );
-
-        prefs.addLineNumber = sp.getBoolean(KEY_ADD_LINENUMBER, false);
-        return prefs;
     }
 
     void setListItem( LinearLayout view ,
-            ArrayList<checkedString> list ,
+            ArrayList<CheckedString> list ,
             View.OnLongClickListener logclicklistener ,
             CompoundButton.OnCheckedChangeListener checkedChangeListener )
     {
         view.removeAllViews();
-        Collections.sort(list, new Comparator<checkedString>() {
+        Collections.sort(list, new Comparator<CheckedString>() {
             @Override
-            public int compare(checkedString object1, checkedString object2) {
+            public int compare(CheckedString object1, CheckedString object2) {
                 return object1.string.compareToIgnoreCase(object2.string);
             }
         });
-        for( checkedString s : list ){
+        for( CheckedString s : list ){
             CheckBox v = (CheckBox)View.inflate(this, R.layout.list_dir, null);
             if ( s.equals("*") ){
                 v.setText(R.string.label_no_extension);
@@ -464,4 +327,13 @@ public class Settings extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        final List<String> recent = mPrefs.getRecent(mContext);
+        mRecentAdapter.clear();
+        mRecentAdapter.addAll(recent);
+        mRecentAdapter.notifyDataSetChanged();
+    }
 }

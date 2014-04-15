@@ -1,7 +1,7 @@
 package jp.sblo.pandora.aGrep;
 
-import java.io.BufferedReader;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 
 
 
+@SuppressLint("DefaultLocale")
 public class Search extends Activity implements GrepView.Callback
 {
     private GrepView mGrepView;
@@ -42,7 +44,7 @@ public class Search extends Activity implements GrepView.Callback
     private String mQuery;
     private Pattern mPattern;
 
-    private Settings.Prefs mPrefs;
+    private Prefs mPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,7 +54,7 @@ public class Search extends Activity implements GrepView.Callback
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled (true);
 
-        mPrefs = Settings.loadPrefes(this);
+        mPrefs = Prefs.loadPrefes(this);
 
         setContentView(R.layout.result);
 
@@ -78,9 +80,12 @@ public class Search extends Activity implements GrepView.Callback
 
             if ( mQuery!=null && mQuery.length() >0 ){
 
+                mPrefs.addRecent(this , mQuery);
+
                 String patternText = mQuery;
                 if ( !mPrefs.mRegularExrpression ){
                     patternText = escapeMetaChar(patternText);
+                    patternText = convertOrPattern(patternText);
                 }
 
                 if ( mPrefs.mIgnoreCase ){
@@ -119,6 +124,15 @@ public class Search extends Activity implements GrepView.Callback
             newpat.append(c);
         }
         return newpat.toString();
+    }
+
+    static public String convertOrPattern( String pattern )
+    {
+        if ( pattern.contains(" ") ){
+            return "(" + pattern.replace(" ", "|") + ")";
+        }else{
+            return pattern;
+        }
     }
 
 
@@ -199,7 +213,7 @@ public class Search extends Activity implements GrepView.Callback
 
         boolean grepRoot( String text )
         {
-            for( Settings.checkedString dir : mPrefs.mDirList ){
+            for( CheckedString dir : mPrefs.mDirList ){
                 if ( dir.checked && !grepDirectory(new File(dir.string) ) ){
                     return false;
                 }
@@ -245,7 +259,7 @@ public class Search extends Activity implements GrepView.Callback
             }
 
             boolean extok=false;
-            for( Settings.checkedString ext : mPrefs.mExtList ){
+            for( CheckedString ext : mPrefs.mExtList ){
                 if ( ext.checked ){
                     if ( ext.string.equals("*") ){
                         if ( file.getName().indexOf('.')== -1 ){
@@ -281,9 +295,11 @@ public class Search extends Activity implements GrepView.Callback
                     }
                     catch( FileNotFoundException e ){
                         e.printStackTrace();
+                        is.close();
                         return true;
                     } catch (IOException e) {
                         e.printStackTrace();
+                        is.close();
                         return true;
                     }
                     encode = detector.getCharset();

@@ -23,12 +23,13 @@
     />
     <AutoCompleteTextView
       android:id="@+id/EditText01"
-      android:layout_width="wrap_content"
+      android:layout_width="0dip"
       android:capitalize="none"
       android:layout_weight="1"
       android:layout_height="fill_parent"
       android:singleLine="true"
       android:hint="@string/label_hint"
+      android:completionThreshold="1"
     />
     <ImageButton
       android:layout_width="wrap_content"
@@ -55,11 +56,11 @@
       android:id="@+id/adddir"
     />
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:layout_gravity="left|center_vertical"
-      android:textSize="20dp"
+        android:layout_weight="1"
+        android:layout_gravity="left|center_vertical"
+        android:textSize="20sp"
         android:text="@string/label_dir"
         />
   </LinearLayout>
