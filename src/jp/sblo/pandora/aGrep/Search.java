@@ -110,7 +110,7 @@ public class Search extends Activity implements GrepView.Callback
 
     static public String escapeMetaChar( String pattern )
     {
-        final String metachar = ".^$[]*+?|()\\";
+        final String metachar = ".^${}[]*+?|()\\";
 
         StringBuilder newpat = new StringBuilder();
 
